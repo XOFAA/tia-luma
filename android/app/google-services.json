@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "258616587955",
+    "project_id": "tia-luma",
+    "storage_bucket": "tia-luma.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:258616587955:android:d012f7c91e01671da522c6",
+        "android_client_info": {
+          "package_name": "com.example.tia_luma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi_VV5awwPLlbY411dFyH6AvdATJuOeQs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
