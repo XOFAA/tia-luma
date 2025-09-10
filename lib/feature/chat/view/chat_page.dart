@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 
 import 'package:tia_luma/core/service/ChatService.dart';
 import 'package:tia_luma/core/models/mensagem_model.dart';
@@ -23,6 +24,8 @@ class _ChatPageState extends State<ChatPage>
   final controller = TextEditingController();
   final chatService = ChatService();
 
+  final ScrollController _scrollController = ScrollController();
+
   bool isRecording = false;
   bool isLocked = false;
   int recordingSeconds = 0;
@@ -30,6 +33,7 @@ class _ChatPageState extends State<ChatPage>
 
   Offset startPosition = Offset.zero;
 
+  /// Mostra animação de "pensando"
   String? thinkingMessage;
   String? playingId;
 
@@ -63,7 +67,20 @@ class _ChatPageState extends State<ChatPage>
   void dispose() {
     _timer?.cancel();
     _animController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   void _startTimer() {
@@ -87,6 +104,17 @@ class _ChatPageState extends State<ChatPage>
         remetente: "usuario",
       );
       controller.clear();
+      FocusScope.of(context).unfocus(); // fecha teclado
+
+      // Ativa animação pensando
+      setState(() => thinkingMessage = "thinking");
+
+      // Timeout de segurança
+      Future.delayed(const Duration(seconds: 15), () {
+        if (mounted && thinkingMessage != null) {
+          setState(() => thinkingMessage = null);
+        }
+      });
     }
   }
 
@@ -118,9 +146,7 @@ class _ChatPageState extends State<ChatPage>
         mimeType: getCurrentMimeType(),
       );
 
-      setState(() {
-        thinkingMessage = "🤖 A Tia Luma está pensando na sua resposta...";
-      });
+      setState(() => thinkingMessage = "thinking");
     }
   }
 
@@ -149,7 +175,19 @@ class _ChatPageState extends State<ChatPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Tia Luma 👩‍🏫")),
+      backgroundColor: const Color(0xFF0E0822),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF411960),
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Tia Luma",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text("Online agora",
+                style: TextStyle(fontSize: 12, color: Colors.white70)),
+          ],
+        ),
+      ),
       body: Stack(
         children: [
           Column(
@@ -177,54 +215,63 @@ class _ChatPageState extends State<ChatPage>
                         )
                         .toList();
 
+                    // Remove animação quando chega a última resposta da tia_luma
                     if (thinkingMessage != null &&
-                        mensagens.any(
-                          (m) =>
-                              m.remetente == "ia" &&
-                              (m.texto.isNotEmpty || m.tipo == "audio"),
-                        )) {
+                        mensagens.isNotEmpty &&
+                        mensagens.last.remetente == "tia_luma") {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         setState(() => thinkingMessage = null);
                       });
                     }
 
+                    _scrollToBottom();
+
                     return ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.all(16),
                       itemCount:
                           mensagens.length + (thinkingMessage != null ? 1 : 0),
                       itemBuilder: (context, index) {
+                        // animação pensando
                         if (thinkingMessage != null &&
                             index == mensagens.length) {
                           return Align(
                             alignment: Alignment.centerLeft,
                             child: Container(
-                              margin: const EdgeInsets.symmetric(vertical: 6),
+                              margin:
+                                  const EdgeInsets.symmetric(vertical: 6),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
+                                color: const Color(0xFF8E44AD),
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: Text(thinkingMessage!),
+                              child: SizedBox(
+                                height: 40,
+                                width: 60,
+                                child: Lottie.asset(
+                                  "assets/lottie/LoadingDot.json",
+                                  repeat: true,
+                                ),
+                              ),
                             ),
                           );
                         }
 
                         final msg = mensagens[index];
                         final isUser = msg.remetente == "usuario";
-                        final isSystem = msg.remetente == "sistema";
 
                         return Align(
-                          alignment:
-                              isUser ? Alignment.centerRight : Alignment.centerLeft,
+                          alignment: isUser
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
                           child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
+                            margin:
+                                const EdgeInsets.symmetric(vertical: 6),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: isSystem
-                                  ? Colors.grey.shade200
-                                  : (isUser
-                                      ? Colors.deepOrange.shade100
-                                      : Colors.white),
+                              color: isUser
+                                  ? const Color(0xFF3498DB)
+                                  : const Color(0xFF8E44AD),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: msg.tipo == "audio" &&
@@ -237,7 +284,7 @@ class _ChatPageState extends State<ChatPage>
                                           playingId == msg.id
                                               ? Icons.stop
                                               : Icons.play_arrow,
-                                          color: Colors.deepOrange,
+                                          color: Colors.white,
                                         ),
                                         onPressed: () => _togglePlay(
                                           msg.audioBase64!,
@@ -247,10 +294,15 @@ class _ChatPageState extends State<ChatPage>
                                       playingId == msg.id
                                           ? AnimatedBars(
                                               animController: _animController)
-                                          : const Text("Áudio"),
+                                          : const Text("Áudio",
+                                              style: TextStyle(
+                                                  color: Colors.white)),
                                     ],
                                   )
-                                : Text(msg.texto),
+                                : Text(
+                                    msg.texto,
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
                           ),
                         );
                       },
@@ -267,26 +319,29 @@ class _ChatPageState extends State<ChatPage>
                     Expanded(
                       child: TextField(
                         controller: controller,
-                        decoration: const InputDecoration(
-                          hintText: "Digite sua dúvida...",
-                          border: OutlineInputBorder(),
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: "Digite sua mensagem...",
+                          hintStyle:
+                              const TextStyle(color: Colors.white54),
+                          filled: true,
+                          fillColor: const Color(0xFF411960),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.send, color: Colors.deepOrange),
+                      icon:
+                          const Icon(Icons.send, color: Color(0xFF00C853)),
                       onPressed: _enviarMensagem,
                     ),
                     GestureDetector(
                       onLongPressStart: (details) {
                         startPosition = details.globalPosition;
                         _onStartRecord();
-                      },
-                      onLongPressMoveUpdate: (details) {
-                        final dy = details.globalPosition.dy - startPosition.dy;
-                        if (dy < -50 && !isLocked) {
-                          setState(() => isLocked = true);
-                        }
                       },
                       onLongPressEnd: (_) {
                         if (!isLocked) {
@@ -295,15 +350,12 @@ class _ChatPageState extends State<ChatPage>
                       },
                       child: Container(
                         padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: isRecording ? Colors.red : Colors.deepOrange,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF00C853),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
-                          Icons.mic,
-                          color: Colors.white,
-                          size: 28,
-                        ),
+                        child: const Icon(Icons.mic,
+                            color: Colors.white, size: 28),
                       ),
                     ),
                   ],
@@ -330,36 +382,8 @@ class _ChatPageState extends State<ChatPage>
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  if (!isLocked)
-                    const Text(
-                      "⬆️ Deslize para cima para travar",
-                      style: TextStyle(color: Colors.white),
-                    ),
-
-                  if (isLocked)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: _onStopRecord,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                          ),
-                          icon: const Icon(Icons.send, color: Colors.white),
-                          label: const Text("Enviar"),
-                        ),
-                        const SizedBox(width: 20),
-                        ElevatedButton.icon(
-                          onPressed: _cancelRecord,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                          ),
-                          icon: const Icon(Icons.close, color: Colors.white),
-                          label: const Text("Cancelar"),
-                        ),
-                      ],
-                    ),
+                  const Text("⬆️ Segure para gravar",
+                      style: TextStyle(color: Colors.white)),
                 ],
               ),
             ),
@@ -387,7 +411,7 @@ class AnimatedBars extends StatelessWidget {
                 curve: Interval(0.2 * i, 1.0, curve: Curves.easeInOut),
               ),
             ),
-            child: Container(width: 4, height: 20, color: Colors.deepOrange),
+            child: Container(width: 4, height: 20, color: Colors.white),
           ),
         );
       }),

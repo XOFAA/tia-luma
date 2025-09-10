@@ -24,7 +24,7 @@ class FinishedPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset("assets/images/loading.png", height: 220),
+              Image.asset("assets/images/finished.png", height: 220),
               const SizedBox(height: 32),
               const Text(
                 "Tudo pronto!\nEstarei com você em todas as suas atividades e dúvidas, converse comigo sempre que tiver uma dúvida!",
