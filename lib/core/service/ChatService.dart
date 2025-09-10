@@ -6,7 +6,7 @@ import '../../../core/models/mensagem_model.dart';
 class ChatService {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  Future<void> enviarMensagem(String userId, String texto) async {
+  Future<void> enviarMensagem(String userId, String texto, {required String remetente}) async {
     final mensagem = Mensagem(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       remetente: "usuario",
