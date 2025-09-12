@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tia_luma/core/models/usuario_model.dart';
 import 'package:tia_luma/feature/gamification/viewmodel/gamification_viewmodel.dart';
 import 'package:tia_luma/feature/gamification/widget/fase_box.dart';
 
 class GamificationPage extends StatefulWidget {
-  const GamificationPage({super.key});
+ final Usuario usuario; // 👈 recebe o usuario
+
+  const GamificationPage({super.key, required this.usuario});
 
   @override
   State<GamificationPage> createState() => _GamificationPageState();
@@ -191,20 +195,21 @@ class _GamificationPageState extends State<GamificationPage> {
       ),
 
       // FloatingActionButton Tia Luma
-    floatingActionButton: SizedBox(
-  width: MediaQuery.of(context).size.width * 0.20,  // 20% da largura da tela
-  height: MediaQuery.of(context).size.width * 0.20, // mantém quadrado
+floatingActionButton: SizedBox(
+  width: MediaQuery.of(context).size.width * 0.20,
+  height: MediaQuery.of(context).size.width * 0.20,
   child: FloatingActionButton(
     onPressed: () {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Abrir chat da Tia Luma")),
+      context.push(
+        "/chat",
+       extra: widget.usuario.id, // passa o id do usuário logado
       );
     },
     backgroundColor: Colors.transparent,
     elevation: 0,
     child: Image.asset(
       "assets/images/floatbutton.png",
-     fit: BoxFit.cover,
+      fit: BoxFit.cover,
     ),
   ),
 ),

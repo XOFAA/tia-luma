@@ -181,10 +181,14 @@ class _ChatPageState extends State<ChatPage>
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text("Tia Luma",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            Text("Online agora",
-                style: TextStyle(fontSize: 12, color: Colors.white70)),
+            Text(
+              "Tia Luma",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            Text(
+              "Online agora",
+              style: TextStyle(fontSize: 12, color: Colors.white70),
+            ),
           ],
         ),
       ),
@@ -238,8 +242,7 @@ class _ChatPageState extends State<ChatPage>
                           return Align(
                             alignment: Alignment.centerLeft,
                             child: Container(
-                              margin:
-                                  const EdgeInsets.symmetric(vertical: 6),
+                              margin: const EdgeInsets.symmetric(vertical: 6),
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: const Color(0xFF8E44AD),
@@ -265,8 +268,7 @@ class _ChatPageState extends State<ChatPage>
                               ? Alignment.centerRight
                               : Alignment.centerLeft,
                           child: Container(
-                            margin:
-                                const EdgeInsets.symmetric(vertical: 6),
+                            margin: const EdgeInsets.symmetric(vertical: 6),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isUser
@@ -274,8 +276,8 @@ class _ChatPageState extends State<ChatPage>
                                   : const Color(0xFF8E44AD),
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child: msg.tipo == "audio" &&
-                                    msg.audioBase64 != null
+                            child:
+                                msg.tipo == "audio" && msg.audioBase64 != null
                                 ? Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -293,10 +295,14 @@ class _ChatPageState extends State<ChatPage>
                                       ),
                                       playingId == msg.id
                                           ? AnimatedBars(
-                                              animController: _animController)
-                                          : const Text("Áudio",
+                                              animController: _animController,
+                                            )
+                                          : const Text(
+                                              "Áudio",
                                               style: TextStyle(
-                                                  color: Colors.white)),
+                                                color: Colors.white,
+                                              ),
+                                            ),
                                     ],
                                   )
                                 : Text(
@@ -322,8 +328,7 @@ class _ChatPageState extends State<ChatPage>
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: "Digite sua mensagem...",
-                          hintStyle:
-                              const TextStyle(color: Colors.white54),
+                          hintStyle: const TextStyle(color: Colors.white54),
                           filled: true,
                           fillColor: const Color(0xFF411960),
                           border: OutlineInputBorder(
@@ -334,8 +339,7 @@ class _ChatPageState extends State<ChatPage>
                       ),
                     ),
                     IconButton(
-                      icon:
-                          const Icon(Icons.send, color: Color(0xFF00C853)),
+                      icon: const Icon(Icons.send, color: Color(0xFF00C853)),
                       onPressed: _enviarMensagem,
                     ),
                     GestureDetector(
@@ -354,8 +358,11 @@ class _ChatPageState extends State<ChatPage>
                           color: Color(0xFF00C853),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.mic,
-                            color: Colors.white, size: 28),
+                        child: const Icon(
+                          Icons.mic,
+                          color: Colors.white,
+                          size: 28,
+                        ),
                       ),
                     ),
                   ],
@@ -382,8 +389,10 @@ class _ChatPageState extends State<ChatPage>
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text("⬆️ Segure para gravar",
-                      style: TextStyle(color: Colors.white)),
+                  const Text(
+                    "⬆️ Segure para gravar",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ],
               ),
             ),

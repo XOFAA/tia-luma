@@ -25,7 +25,7 @@ class ChatService {
 
     // dispara para o n8n
     await http.post(
-      Uri.parse("https://automacao.agenciadigital.com.vc/webhook/tia-luma"),
+      Uri.parse("https://automacao.agenciadigital.com.vc/webhook-test/tia-luma"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"userId": userId, "Texto": texto}),
     );
